@@ -1,0 +1,63 @@
+- name: Install oneshield
+  hosts: "{{ target_host_var }}"
+  become: true
+
+  # Install after install service
+  tasks:
+    #config
+    - name: mkdir /etc/oneshield
+      tags: install
+      ansible.builtin.file:
+        path: /etc/oneshield
+        state: directory
+        mode: "0700"
+    - name: Copy config.yaml and grant permission
+      tags: install
+      ansible.builtin.copy:
+        src: ../../pkg/config/config.yaml
+        dest: /etc/oneshield/config.yaml
+        mode: "0700"
+    - name: make sure /var/oneshield exist
+      tags: install
+      ansible.builtin.file:
+        path: /var/oneshield
+        state: directory
+        mode: "0700"
+    - name: Add serve alias for user
+      lineinfile:
+        path: ~/.bashrc
+        line: "alias tailoneshield='tail -n 100 /var/log/oneshield/oneshield.log'"
+        regexp: "^alias tailoneshield='tail -n 100 /var/log/oneshield/oneshield.log'$"
+        state: present
+        insertafter: EOF
+        create: True
+    - name: Source .bashrc
+      shell: "source ~/.bashrc"
+
+    #oneshield
+    - name: Copy oneshield service to /etc/systemd/system/
+      tags: install
+      ansible.builtin.copy:
+        src: ../../conf/oneshield.service
+        dest: /etc/systemd/system/oneshield.service
+        mode: "0644"
+    - name: Copy oneshield to /usr/local/bin/oneshield_tmp
+      ansible.builtin.copy:
+        src: ../../dist/service
+        dest: /usr/local/bin/oneshield_tmp
+        mode: "0700"
+      tags: install_oneshield,install
+    - name: Stop all oneshield services
+      ansible.builtin.service:
+        name: oneshield
+        state: stopped
+      tags: stop_oneshield,install_oneshield
+    - name: Copy /usr/local/bin/oneshield_tmp to /usr/local/bin/oneshield
+      ansible.builtin.shell: mv /usr/local/bin/oneshield_tmp /usr/local/bin/oneshield
+      tags: install_oneshield,install
+    - name: Restart oneshield service
+      tags: install_oneshield,install
+      ansible.builtin.service:
+        name: oneshield
+        state: restarted
+#ansible-playbook playbooks/tasks/oneshield.yaml --tags=install_oneshield

@@ -1,0 +1,4 @@
+# ansible-playbook -i inventory.yml playbook.yml --extra-vars "target_host_var=your_target_host"
+all:
+  hosts:
+    "inet_cl":

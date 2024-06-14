@@ -1,0 +1,16 @@
+env:
+  oneshield_host: "dnses.xyz:8080"
+  mysql_host: "localhost"
+  is_staging: true
+  test: dsadsa
+  telegram_key: "6805560856:AAFekfSsZnFJhe336IxEyg6DN_QhoFT9VI8"
+log:
+  path: /var/log/oneshield/oneshield.log
+  max_size: 500
+  max_age: 30
+  max_backups: 3
+services:
+  mysql_host: "dnses.xyz"
+  mysql_port: 3306
+  ftp_host: "dnses.xyz"
+  ftp_port: 21
